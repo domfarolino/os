@@ -1,0 +1,1 @@
+This is a source file with a bunch of contents written to it. The goal is to write a C program that utilizes system calls to copy the contents of this file to another one.
