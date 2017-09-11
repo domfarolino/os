@@ -1,10 +1,5 @@
-obj-m := dommod.o
-
-KDIR := /lib/modules/$(shell uname -r)/build
-PWD := $(shell pwd)
-
-default:
-	$(MAKE) -C $(KDIR) SUBDIRS=$(PWD) modules
-
+obj-m += dommod.o
+all:
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 clean:
-	rm -rf *.o *.ko *.mod.* *.symvers *.order
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
