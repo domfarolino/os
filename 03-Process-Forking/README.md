@@ -91,7 +91,7 @@ information with the macros defined in `sys/wait.h`.
 Question for the reader: What happens here when we combine the `WNOHANG` and `WUNTRACED` flags together
 in a single OR list when we wait process termination?
 
-Answer: The call to `waitpid(pid, &status, WNOHANG | WUNTRACED) still returns immediately as expected, but
+Answer: The call to `waitpid(pid, &status, WNOHANG | WUNTRACED)` still returns immediately as expected, but
 instead of looking for ONLY terminated processes and returning immediately, it also looks for stoppped
 processes and returns its findings (or 0) immediately. So as expected, we get the best of both worlds: an
 immediately returning call to `waitpid`, but also the ability to pick up stopped processes, assuming they are
