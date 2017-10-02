@@ -1,4 +1,4 @@
 CXX=gcc
 
-main: copy.c
+main: fork.c
 	$(CXX) $^
