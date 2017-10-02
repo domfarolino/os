@@ -39,22 +39,26 @@ if (childProcessID == 0) {
 
 ### `wait`/`waitpid`
 
-Available in the `sys/wait.h` header, the `wait` and `waitpid` system calls allow a process to synchronously
-wait for the termination or state change of a child process. The `wait` system call simply takes in a pointer
-to an integer and waits for any child process to be terminated. Upon return it will fill its integer pointer
-parameter with the status of the terminated child, and return the child's PID.
+Available in the `sys/wait.h` header, the `wait` and `waitpid` system calls allow a process to wait for the
+termination or state change of a child process. The `wait` system call simply takes in a pointer to an integer
+and waits for any child process to be terminated. When a child process terminates it will return its PID and fill
+the integer pointer with the status of the terminated child.
 
-By default `waitpid` is a little more specific by allowing us to wait for some specific child process to terminate
-by accepting the child-to-wait-for's PID as the first argument. If the first argument is `-1` the behavior is the same
-as `wait` and it waits for *any* child process to terminate. The second argument is still a pointer to an integer, however
-the third argument is an OR of up to two constants `WNOHANG` and `WUNTRACED` and allows us to listen to a little bit more than
-just child termination.
+By default, `waitpid` is a little more specific, allowing us to wait for some specific child process to terminate
+by allowing us to pass in its PID as the first argument. If the first argument is `-1`, the behavior is the same
+as `wait`, and it waits for *any* child process to terminate. The second argument is still a pointer to an integer,
+however the third argument is an OR of up to two constants `WNOHANG` and `WUNTRACED`, and allows us to listen to a
+little bit more than just child termination.
 
-`WNOHANG` is fairly interesting because it doesn't block on the termination of some process. Instead it only tries to reap the
-exit status of already-terminated zombie processes, and if there isn't any, doesn't block on future termination, and just returns
-`0`. For more information see this fabulous answer: https://stackoverflow.com/a/34845669/3947332.
+`WNOHANG` is fairly interesting because it doesn't block on the termination of a process. Instead it only tries to
+claim the exit status of an already-terminated zombie process and return its PID, however if there is none it immediately
+returns `0`, and doesn't wait for any child to terminate. For more information, see this fabulous answer:
+https://stackoverflow.com/a/34845669/3947332.
 
 `WUNTRACED` allows our parent process to see status information of stopped processes in addition to terminated processes.
+This can be important as if we're waiting on a process without the `WUNTRACED` option constant, and the process gets the
+stop signal, the parent will never be notified because the child hasn't terminated, even though it is suspended. Therefore
+we hit a bit of a deadlock in which neither child nor parent process is doing any work.
 
 The `sys/wait.h` header provides some useful macros we can use to get some information as to how a child process was
 terminated or stopped. The most useful (IMO) and interesting are:
@@ -65,3 +69,30 @@ terminated or stopped. The most useful (IMO) and interesting are:
   - `WTERMSIG`
  - `WIFSTOPPED`
   - `WSTOPSIG`
+
+# Examples
+
+### `fork.c`
+
+This basic demo creates four processes in total, demonstrates what it looks like for a process to wait
+on its children to finish executing, and displays their PIDs in a pseudo-tree style in the terminal.
+
+### `fork2.cpp`
+
+This is a trivial demo.
+
+### `fork3.c`
+
+This demo illustrates what it looks like to use the two available options `WNOHANG` and `WUNTRACED` as
+the third parameter for the `waitpid`. We clean up a zombie child process and then shortly after begin
+waiting for our second child process to be terminated or stopped via a signal, and then read its status
+information with the macros defined in `sys/wait.h`.
+
+Question for the reader: What happens here when we combine the `WNOHANG` and `WUNTRACED` flags together
+in a single OR list when we wait process termination?
+
+Answer: The call to `waitpid(pid, &status, WNOHANG | WUNTRACED) still returns immediately as expected, but
+instead of looking for ONLY terminated processes and returning immediately, it also looks for stoppped
+processes and returns its findings (or 0) immediately. So as expected, we get the best of both worlds: an
+immediately returning call to `waitpid`, but also the ability to pick up stopped processes, assuming they are
+already stopped by the time we look for them (remember we're not waiting!).
