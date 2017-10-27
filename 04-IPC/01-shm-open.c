@@ -5,7 +5,7 @@
 
 int main() {
   // 1.) Create a shared memory object that the kernel can reference by a given name
-  int shmOpenResult = shm_open("shared-memory", O_CREAT | O_RDWR | O_EXCL);
+  int shmOpenResult = shm_open("shared-memory", O_CREAT | O_RDWR | O_EXCL, 755);
   if (shmOpenResult == -1) {
     printf("Failed to create shared memory file descriptor, failed with errno: %d\n", errno);
   } else {

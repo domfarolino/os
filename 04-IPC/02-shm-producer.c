@@ -12,7 +12,7 @@ int main() {
   const int SIZE = 64;
 
   // 1.) Create a shared memory file descriptor
-  int shm_fd = shm_open(NAME, O_CREAT | O_RDWR | O_EXCL);
+  int shm_fd = shm_open(NAME, O_CREAT | O_RDWR | O_EXCL, 757);
 
   if (shm_fd >= 0) {
     printf("The shared memory object was created with file descriptor %d\n", shm_fd);
@@ -46,6 +46,7 @@ int main() {
 
   const char* firstMessage = "Here's some text for our shared memory.";
   const char* secondMessage = ".. And SOME MORE!";
+  printf("Writing to shared memory: \n%s%s\n", firstMessage, secondMessage);
   sprintf(sharedMemoryPointer, "%s", firstMessage);
   sprintf(sharedMemoryPointer + strlen(firstMessage), "%s", secondMessage);
   printf("\x1B[00m");
