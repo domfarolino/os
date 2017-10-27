@@ -46,7 +46,7 @@ and waits for any child process of the calling process to be terminated. When a 
 return its PID and fill the integer pointer with status information of the terminated child (more on this later).
 
 By default, `waitpid` is a little more specific, allowing us to wait for some specific child process to terminate
-by accepting the PID of the child-to-wait-for as its first argument. Alternativelym, if the first argument is `-1`,
+by accepting the PID of the child-to-wait-for as its first argument. Alternatively, if the first argument is `-1`,
 the behavior is the same as `wait`, and it waits for *any* child process to terminate. The second argument is still
 a pointer to an integer, however the third argument is an OR of up to two constants `WNOHANG` and `WUNTRACED`, and
 allows us to listen to a little bit more than just child *termination*.
@@ -80,6 +80,24 @@ on its children to finish executing, and displays their PIDs in an intuitive for
 ### `fork2.cpp`
 
 This is a trivial demo.
+
+### `forkChain.cpp`
+
+This program is designed to take in an integer from stdin and create a completely linear chain of forked
+child processes, such that no two child processes share the same parent. Naturally, multiple bare calls to
+`fork()` increases the number of processes exponentially, however we can limit the number of processes
+spawned by `fork()` by ensuring we only call `fork()` when we're in a child process. In this demo we
+maintain an dynamically allocated array of `pid_t`s for our child processes. We want to loop through all
+of the `pid_t`s and if we're in the child-most process, fork another one to our array. The way to check
+to see if we're in the child-most process is to see if the value of `fork()` called for the previously
+forked process was `0`. If it is, we can fork a new process to our array, and continue, where the next
+process will check to see if the new value of `fork()` is `0`, so it can continue the chain. To kick
+things off we fork the first process outside of the loop since there is no previous value of `fork()` to
+check. From then on all the forking appears in the loop where we start by checking the value of `arr[0]`
+to see if we can fork `arr[1]`. A catch is that we'll have to initialize all `pid_t`s in the array to
+non-0 values so we don't always appear to be in the child process when we're in the intermediate parent
+processes (the internal nodes in the process tree). We'll also want to `wait` on a child process if we
+plan on displaying the tree in a reasonable way.
 
 ### `fork3.c`
 

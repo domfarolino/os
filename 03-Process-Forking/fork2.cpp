@@ -19,5 +19,6 @@ int main() {
     std::cin >> test;
     std::cout << "  Thanks! Child quitting now :)" << std::endl;
   }
+
   return 0;
 }

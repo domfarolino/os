@@ -12,3 +12,4 @@ Random things learned:
  - Finding the full path of some included header can be done with `echo "#include <someHeader.h>" | gcc -E -x c -| grep /someHeader.h`
  - System calls are found in the second section of the man pages, and therefore can be accessed via `man 2 <systemCallhere>`
  - Wow I finally learned the UNIX filesystem permission model!
+ - Makefile rule/target stuff: ![^@=target](imgs/make.png)
