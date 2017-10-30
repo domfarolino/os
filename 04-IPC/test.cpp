@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -7,7 +8,7 @@
 
 int main() {
   const int SIZE = 32;
-  int fd = open("03-input", O_RDWR, 755);
+  int fd = open("03-input", O_RDWR | O_CREAT, 0755);
   if (fd == -1) {
     printf("There was an error opening up 'input', errno: %d\n", errno);
     return 1;
@@ -23,9 +24,9 @@ int main() {
                 "is 32 bytes in size. Now we'll read the file via the file descriptor an the `read`\n" <<
                 "system call with a buffer, two bytes at a time. Press any key to continue." << std::endl;
   std::cin.get();
+
   char buffer[SIZE];
   int bytesRead;
-
   while ((bytesRead = read(fd, buffer, 2)) > 0) {
     printf("The data read to the buffer is: %s\n", buffer);
   }
@@ -35,8 +36,10 @@ int main() {
                 "original file or private to the process (copy-on-write). Press any key to continue." << std::endl;
   std::cin.get();
 
-  void *ptr = mmap(0, SIZE, PROT_READ, MAP_SHARED | MAP_FILE, fd, 0);
-  if ((size_t)ptr == -1) {
+  void* ptr = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE| MAP_FILE, fd, 0);
+  char* charPtr = (char*)ptr;
+  if (ptr == MAP_FAILED) { // check out the definition of MAP_FAILED! (sys/mman.h)
+    close(fd);
     printf("Error mapping the file to process memory, errno: %d\n", errno);
     return 1;
   }
@@ -45,14 +48,20 @@ int main() {
                 ptr << ". Now go ahead and enter a string to write to the address, and we'll\n" <<
                 "see that the changes are propagated to the actual file in the directory." << std::endl;
   char input[SIZE];
-  std::cin >> input;
-  strcpy((char*)ptr, input);
+  std::cin.getline(input, SIZE);
+  for (int i = 0; i < SIZE; ++i) {
+    printf("Writing %c to position %d\n", input[i], i);
+    charPtr[i] = input[i];
+  }
+
+  if (msync(charPtr, SIZE, MS_SYNC) == -1) {
+    printf("Error syncing file to disk\n");
+  }
 
   munmap(ptr, SIZE);
   close(fd);
 
   std::cout << "Alright! Now go ahead and check the file's contents however you'd like, and verify that\n" <<
-                "the contents have been replaced by the above message. Press any key to terminate." << std::endl;
-  std::cin.get();
+                "the contents have been replaced by the above message." << std::endl;
   return 0;
 }
