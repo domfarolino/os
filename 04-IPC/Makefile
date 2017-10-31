@@ -1,5 +1,5 @@
 CXX=gcc
-PROGRAMS=01-shm-open 01-shm-unlink 02-shm-producer 02-shm-consumer
+PROGRAMS=01-shm-open 01-shm-unlink 02-shm-producer 02-shm-consumer 03-mmap-file
 
 all: $(PROGRAMS)
 
@@ -13,6 +13,9 @@ all: $(PROGRAMS)
 	$(CXX) $^ -o $@
 
 02-shm-consumer: 02-shm-consumer.c
+	$(CXX) $^ -o $@
+
+03-mmap-file: 03-mmap-file.c
 	$(CXX) $^ -o $@
 
 clean:
