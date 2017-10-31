@@ -13,5 +13,6 @@ int main() {
   } else {
     printf("Shared memory file descriptor successfully unlinked with its name!\n");
   }
+
   return 0;
 }

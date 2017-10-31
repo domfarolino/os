@@ -12,7 +12,7 @@ int main() {
   const int SIZE = 64;
 
   // 1.) Create a shared memory file descriptor
-  int shm_fd = shm_open(NAME, O_CREAT | O_RDWR | O_EXCL, 757);
+  int shm_fd = shm_open(NAME, O_CREAT | O_RDWR | O_EXCL, 0755);
 
   if (shm_fd >= 0) {
     printf("The shared memory object was created with file descriptor %d\n", shm_fd);
@@ -38,7 +38,7 @@ int main() {
   void* sharedMemoryPointer = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
   if (sharedMemoryPointer >= 0) { // a valid memory address
     printf("A memory map for the shared memory has been created and starts at address: %p\n", sharedMemoryPointer);
-  } else if ((int)sharedMemoryPointer == -1) {
+  } else if (sharedMemoryPointer == MAP_FAILED) { // check out it's definition
     printf("Failed to create memory map to file descriptor\n");
     printf("errno: %d\n", errno);
     return 1;
