@@ -1,5 +1,5 @@
 CXX=gcc
-PROGRAMS=01-shm-open 01-shm-unlink 02-shm-producer 02-shm-consumer 03-mmap-file
+PROGRAMS=01-shm-open 01-shm-unlink 02-shm-producer 02-shm-consumer 03-mmap-file 04-pipe
 UNAME := $(shell uname)
 
 ifeq ($(UNAME), Linux)
@@ -23,6 +23,9 @@ all: $(PROGRAMS)
 	$(CXX) $^ -o $@ $(CFLAGS)
 
 03-mmap-file: 03-mmap-file.c
+	$(CXX) $^ -o $@ $(CFLAGS)
+
+04-pipe: 04-pipe.c
 	$(CXX) $^ -o $@ $(CFLAGS)
 
 clean:
