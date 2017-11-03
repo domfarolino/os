@@ -83,14 +83,26 @@ The sixth argument specifies an offset. Yay.
 Go ahead and run `make` in this directory to build two examples of shared memory operations. The first
 example (`01-*`) demonstrates a process (`01-shm-open`) creating a shared memory object in the kernel,
 associating it with a unique name, and getting a file descriptor representation of it, all via the
-`shm_open` system call. Finally, another process (`02-shm-unlink`) comes along and disassociates this
+`shm_open` system call. Finally, another process (`01-shm-unlink`) comes along and disassociates this
 shared memory object in the kernel from its name (more or less reverting the work the first process did
 and basically "cleaning up" after it). It may make sense for a consumer to be responsible for these kinds
 of actions.
 
 In the second example (`02-*`) we see an incredibly simple IPC example using shared memory, and the above
 mentioned system calls. After reading the above descriptions and some of the man pages, what's happening
-should be fairly obvious.
+should be fairly obvious, but basically we're creating shared memory in one process, mapping it to the
+address space of said process, writing to it, and doing the same in another process but instead of writing,
+we're reading.
+
+In the third example (`03-mmap-file`) we map an existing file (or open one if it doesn't exist) to main
+memory, and then continue writing a message to the memory mapped to the process's address space to update
+the actual file's contents. We `mmap` with the `MAP_SHARED` flag indicating that updates to the mapped memory
+should persist in the original file, however we could use `MAP_PRIVATE` which would make a private copy of
+the data in the file and map this to memory (copy-on-write).
+
+The fourth is a basic example of a unix ordinary pipe. We use a pipe (basically a pair of file descriptors)
+to write data from a parent to a child process. Ordinary pipes only share data between multiple processes
+if they are somehow related (i.e., parent-child relationship).
 
 ----
 
