@@ -78,6 +78,16 @@ The fifth argument is the source file descriptor that we're allocating space in 
 
 The sixth argument specifies an offset. Yay.
 
+### `msync`
+
+This system call flushes changes from a certain memory range that was mapped via `mmap` back to disk.
+Without this, there is no guarantee that the memory will be written back before `munmap`.
+
+### `munmap`
+
+This deletes a mapping associated with a specific address range. Mappings are unmapped by default when a
+process terminates.
+
 ## Run the code!
 
 Go ahead and run `make` in this directory to build two examples of shared memory operations. The first
