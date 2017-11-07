@@ -3,8 +3,8 @@
 This folder contains code relating to interprocess communication techniques
 implemented in C. Provided are examples of
 
- - POSIX shared memory
- - Ordinary pipes
+ - [POSIX shared memory](#posix-shared-memory)
+ - [Ordinary pipes](#ordinary-pipes)
  - Named pipes (fifos)
  - System V message queues
 
