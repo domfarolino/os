@@ -4,9 +4,9 @@ This folder contains code relating to interprocess communication techniques
 implemented in C. Provided are examples of
 
  - POSIX shared memory
- - System V message queues
- - Unnamed pipes
+ - Ordinary pipes
  - Named pipes (fifos)
+ - System V message queues
 
 Below are two very basic and watered down descriptions of these shared memory
 and message passing used for IPC. The descriptions are very high level and as
@@ -103,6 +103,28 @@ mapping are flushed to the underlying file. Mappings are unmapped by default whe
 
 ----
 
+# Ordinary pipes
+
+One way two processes can communicate with each other without using shared memory is by using an
+ordinary (anonymous) pipe. The caveat with an ordinary pipe is that it is unidirectional and that
+it can only be shared with related processes, most often in a parent-child relationship. The pipe
+is really just a pair of file descriptors, one for reading, and one for writing.
+
+## System calls
+
+### `pipe(int fildes[2])`
+
+This system call takes in an array of two integers which it uses as file descriptors. The first
+file descriptor corresponds with the read end of the pipe while the second corresponds with the
+write end. We can create the array of file descriptors in a parent process and call `fork()` to
+spawn a child process that has duplicated these descriptors. We can `write` to the write end of
+the pipe from one process and `read` from the read end in another. It may feel bidirectional in
+that it is possible to `write` to a child and then later `read` from the same child, but there
+still only exists a single read/write end which makes it unidirectional. For more information
+see https://stackoverflow.com/questions/8390799.
+
+----
+
 # Message passing
 
 Another way two processes can communicate is via message passing, which provides a
@@ -138,7 +160,6 @@ we could use `MAP_PRIVATE` which would make a private copy of the data (copy-on-
 reflected outside this process.
 
 The fourth example is a basic demonstration of a Unix ordinary (anonymous) pipe. We use a pipe
-(basically a pair of file descriptors) to write data from a parent to a child process. Ordinary
-pipes only share data between multiple processes if they are somehow related (i.e., parent-child relationship).
+(basically a pair of file descriptors) to write data from a parent to a child process.
 
 <!-- Todo: move some of this section to an "Ordinary Pipe" # section -->
