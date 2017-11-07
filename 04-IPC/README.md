@@ -1,11 +1,19 @@
-This folder contains code relating to interprocess communication techniques
-implemented in C. Provided are examples of both shared memory and message passing
-techniques. Below are two very basic and watered down descriptions of these two
-techniques we can use for IPC. The descriptions are very high level and as such are
-fairly incomplete. Feel free to submit a pull request if you feel something should
-be cleared up or added.
+# IPC
 
-# Shared memory
+This folder contains code relating to interprocess communication techniques
+implemented in C. Provided are examples of
+
+ - POSIX shared memory
+ - System V message queues
+ - Unnamed pipes
+ - Named pipes (fifos)
+
+Below are two very basic and watered down descriptions of these shared memory
+and message passing used for IPC. The descriptions are very high level and as
+such are fairly incomplete. Feel free to submit a pull request if you feel
+something should be cleared up or added.
+
+# POSIX shared memory
 
 Two processes can communicate via a chunk of shared memory. One process can
 create a chunk of shared memory which the OS associates with a file descriptor.
@@ -19,110 +27,118 @@ are responsible for synchronizing themselves, and formatting the data they share
 A solution to the producer/consumer problem using shared memory involves using a buffer
 in the shared memory and two pointers, one pointing to the next consumable item and the
 other pointing to the next slot the producer can insert an item in. The important part is
-synchronizing the producer and the consumer so that the consumer doesn't try and consume data
-that does not exist yet, and so the producer does not overwrite data that has not been consumed
-yet.
+synchronizing the producer and the consumer so that the consumer doesn't try and consume
+data that does not exist yet, and the producer doesn't overwrite data that has not been
+consumed yet.
 
-# System calls
+## System calls
 
-There are basically three steps to perform to create and utilize a shared memory object
-for IPC.
+Using shared memory for IPC can be done with both the POSIX and System V APIs. In this example
+we're using the POSIX API for shared memory, which utilizes files mapped to a process's address
+space. There are basically three steps to perform to create and utilize a shared memory object
+for IPC:
 
- - First we create a shared memory object that the OS keeps track of and associates with
-   a given name, and associate this shared memory object with a file descriptor. This is
-   done via the `shm_open` system call, which takes in a unique name.
- - Next we configure its size with `ftruncate`.
- - Finally we map the region of shared memory to our process's address space which gives
-   us a `void*` in return. This acts as our process's window to the shared memory.
+ - First, we create a shared memory object that the OS keeps track of and associates with
+   a file descriptor. This is done via `shm_open`.
+ - Next, we configure the size of the shared memory object with `ftruncate`.
+ - Finally, we map the region of shared memory to our process's address space. This is done
+   with `mmap` which gives us a `void*` in return and acts as our process's window to the
+   shared memory.
 
-### `shm_open`
+### `shm_open(const char *name, int oflag, mode_t mode)`
 
-The `shm_open` system call is used to create a shared memory object and a file descriptor
-that it associated to the shared memory object. It's arguments are basically the same as
-that of the `open` system call's, so not much new here. It makes sense for the producer to
-attempt to create a new shared memory object for it and other processes to use, so we'll
-see the `O_CREAT` flag involved in this call.
+The `shm_open` system call is used to create a shared memory object accessible via the returned
+file descriptor associated with the shared memory object. It's arguments are basically the same
+as that of the `open` system call's, so not much new here. It makes sense for a producer to attempt
+to create a new shared memory object for it and other processes to use, so we'll often see the
+`O_CREAT` (and possibly `O_EXCL`) `oflag`s with this call.
 
-### `ftruncate`
+### `ftruncate(int fildes, off_t length)`
 
 The `ftruncate` system call is relatively simple, as it takes in a file descriptor as its first
-argument, and a size as its second. It either truncates or extends the file referenced by the
-file descriptor to the given length. It returns 0 upon success, and -1 upon failure.
+argument, and a proposed file size as its second. It either truncates or extends the file or shared
+memory object referenced by the file descriptor to the given length.
 
-### `mmap`
+### `mmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset)`
 
-The mmap system call is a little more complex and very versatile. Basically it can map a portion of
-a process's address space to the data represented by a given file descriptor. It returns the address
-of said mapping (`void *`), or -1 upon failure. So we use it to create a place in a process's memory
-for our shared memory object, and then utilize its return value (the actual address in memory) to read
-and write from the file stored in our process's address space. The specifics of the arguments are complex
-so instead of covering tons of variations, I'll just explain the ones we're using in this example.
+The mmap system call is a little more complex and very versatile. Since `read` and `write` behavior
+is undefined when the input file descriptor refers to a shared memory object (POSIX), we can interact
+with shared memory by mapping the shared memory object to a portion of our process's address space and
+reading and writing to it. This system call returns the address of said mapping (`void *`), or -1 upon
+failure. The specifics of the arguments are a tad complex, so instead of covering tons of variations,
+I'll just explain what we're using in this example.
 
 `mmap(0, SIZE, PROT_WRITE | PROT_READ, MAP_SHARED, shm_fd, 0)`
 
 The first argument is the address inside our process's address space we'd like to start our mapping.
-If we pass in 0 (and we don't specify MAP\_FIXED in the flags section) we're allowing the system to
-choose the address for us in some implementation dependent way. If we specify MAP\_FIXED in the flags,
-we're telling the system that it must start the mapping at the given address, or fail if it cannot.
+If we pass in 0 (and don't specify MAP\_FIXED in the flags section) we're allowing the system to
+choose the address for us in some implementation dependent way. If we pass in another address, the
+system will try and create the mapping there if one does not already exist. If one exists, it will
+choose a different place, or overwrite the mapping if `MAP_FIXED` is given as a flag.
 
 The second argument is simply the size of the mapping.
 
 The third argument is an OR list of protections for the memory region in our process's address space.
 We can choose to disallow the pages from being accessed in any way, allow the pages to be read, written,
-or executed.
+or executed. This should not conflict with the open mode of the file.
 
 The fourth argument is a flags arugment which specifies the type of mapped object and miscellaneous options.
-Either `MAP_SHARED` or `MAP_PRIVATE` must be specified (claim the man page).
+Either `MAP_SHARED` or `MAP_PRIVATE`. With `MAP_SHARED`, the mapping is shared with other processes that map
+the same file. Note that updated contents may not be written to the underlying file before `msync` or `munmap`
+is called. With `MAP_PRIVATE`, an copy-on-write mapping is created, private to the calling process.
 
 The fifth argument is the source file descriptor that we're allocating space in memory for.
 
 The sixth argument specifies an offset. Yay.
 
-### `msync`
+### `msync(void *addr, size_t length, int flags)`
 
 This system call flushes changes from a certain memory range that was mapped via `mmap` back to disk.
 Without this, there is no guarantee that the memory will be written back before `munmap`.
 
-### `munmap`
+### `munmap(void *addr, size_t len);`
 
-This deletes a mapping associated with a specific address range. Mappings are unmapped by default when a
-process terminates.
-
-## Run the code!
-
-Go ahead and run `make` in this directory to build two examples of shared memory operations. The first
-example (`01-*`) demonstrates a process (`01-shm-open`) creating a shared memory object in the kernel,
-associating it with a unique name, and getting a file descriptor representation of it, all via the
-`shm_open` system call. Finally, another process (`01-shm-unlink`) comes along and disassociates this
-shared memory object in the kernel from its name (more or less reverting the work the first process did
-and basically "cleaning up" after it). It may make sense for a consumer to be responsible for these kinds
-of actions.
-
-In the second example (`02-*`) we see an incredibly simple IPC example using shared memory, and the above
-mentioned system calls. After reading the above descriptions and some of the man pages, what's happening
-should be fairly obvious, but basically we're creating shared memory in one process, mapping it to the
-address space of said process, writing to it, and doing the same in another process but instead of writing,
-we're reading.
-
-In the third example (`03-mmap-file`) we map an existing file (or open one if it doesn't exist) to main
-memory, and then continue writing a message to the memory mapped to the process's address space to update
-the actual file's contents. We `mmap` with the `MAP_SHARED` flag indicating that updates to the mapped memory
-should persist in the original file, however we could use `MAP_PRIVATE` which would make a private copy of
-the data in the file and map this to memory (copy-on-write).
-
-The fourth is a basic example of a unix ordinary pipe. We use a pipe (basically a pair of file descriptors)
-to write data from a parent to a child process. Ordinary pipes only share data between multiple processes
-if they are somehow related (i.e., parent-child relationship).
+This deletes a mapping associated with a specific address range. Upon calling, changes made to a shared
+mapping are flushed to the underlying file. Mappings are unmapped by default when a process terminates.
 
 ----
 
 # Message passing
 
 Another way two processes can communicate is via message passing, which provides a
-mechanism for IPC and the synchronization of actions without a shared memory space.
-Processes can communicate directly, by explicitly referencing each other, or indirectly
-by passing messages to a mailbox or port (similar to shared memory).
+mechanism for IPC without a shared memory space. Processes can communicate directly,
+by explicitly referencing each other, or indirectly by passing messages to a mailbox
+or port (similar to shared memory).
 
 ## System calls
 
 ### `coming_soon...`
+
+# Run the code!
+
+Go ahead and run `make` in this directory to build examples of programs that use IPC. The first
+example (`01-*`) demonstrates a process (`01-shm-open`) creating a shared memory object, associating
+it with a unique name, and getting a file descriptor representation of it via `shm_open`. Finally,
+another process (`01-shm-unlink`) comes along and removes the shared memory object's name, and once
+all processes unmap the data corresponding to the object, removes the object from the kernel.
+
+In the second example (`02-*`) we see an incredibly simple shared memory example. After reading the
+above descriptions and some of the man pages, what's happening should be fairly obvious, but basically
+what we're doing is:
+
+ - Creating a shared memory object in a producer process
+ - Mapping it to the address space of said process
+ - Writing to it
+ - Doing the same in a consumer process but reading the data instead of writing
+
+In the third example (`03-mmap-file`), we map an existing file (or open one if it doesn't exist) to memory,
+and then continue writing a message to the mapped memory to update the actual file's contents. We `mmap` with
+the `MAP_SHARED` flag indicating that updates to the mapped memory should persist in the original file, however
+we could use `MAP_PRIVATE` which would make a private copy of the data (copy-on-write) whose changes will not be
+reflected outside this process.
+
+The fourth example is a basic demonstration of a Unix ordinary (anonymous) pipe. We use a pipe
+(basically a pair of file descriptors) to write data from a parent to a child process. Ordinary
+pipes only share data between multiple processes if they are somehow related (i.e., parent-child relationship).
+
+<!-- Todo: move some of this section to an "Ordinary Pipe" # section -->
