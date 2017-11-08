@@ -125,6 +125,29 @@ see https://stackoverflow.com/questions/8390799.
 
 ----
 
+# Named pipes (fifos)
+
+Named pipes, or fifos as they're often referred to as in Unix-like kernels, are a special type of
+file that contains no contents in the filesystem, and whose existence merely acts as a way to reference
+the pipe from other processes.
+
+## System calls
+
+### `mkfifo(const char *path, mode_t mode)`
+
+This system call takes in a path which acts as a unique identifier for the pipe/fifo, and a permission
+mode, and returns 0 on success, and -1 on failure. This function does not provide a file descriptor, it
+just creates a special type of file whose type is "named pipe (fifo)". We can proceed to use `open` to
+get the file descriptor, and call `read` and `write` as appropriate to give and get data to and from other
+processes that open the pipe. Since the file contains no contents, data isn't stored in the filesystem so
+a call to `open` with write capabilities hangs until a reader comes along with read capabilities for data
+to stream to.
+
+### `unlink(const char *path)`
+
+This system call removes a link to the given path and decrements the link count of the file referenced by
+path. If the link count is 0 and no processes have the file open, the resources are reclaimed by the kernel.
+
 # Message passing
 
 Another way two processes can communicate is via message passing, which provides a
