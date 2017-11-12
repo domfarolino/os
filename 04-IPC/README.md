@@ -148,6 +148,8 @@ to stream to.
 This system call removes a link to the given path and decrements the link count of the file referenced by
 path. If the link count is 0 and no processes have the file open, the resources are reclaimed by the kernel.
 
+----
+
 # Message passing
 
 Another way two processes can communicate is via message passing, which provides a
