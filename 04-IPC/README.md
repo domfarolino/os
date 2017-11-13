@@ -161,6 +161,8 @@ or port (similar to shared memory).
 
 ### `coming_soon...`
 
+----
+
 # Run the code!
 
 Go ahead and run `make` in this directory to build examples of programs that use IPC. The first
