@@ -3,7 +3,7 @@ PROGRAMS=01-shm-open 01-shm-unlink 02-shm-producer 02-shm-consumer 03-mmap-file 
 UNAME := $(shell uname)
 
 ifeq ($(UNAME), Linux)
-  CFLAGS= -lrt
+  CFLAGS= -lrt # To use shm_get and shm_unlink in Linux we must link with the Realtime Extensions Library
 else
   CFLAGS=
 endif
