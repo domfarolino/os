@@ -13,3 +13,4 @@ Random things learned:
  - System calls are found in the second section of the man pages, and therefore can be accessed via `man 2 <systemCallhere>`
  - Wow I finally learned the UNIX filesystem permission model!
  - Makefile rule/target stuff: ![^@=target](imgs/make.png)
+ - CTRL+v in insert mode in vim inserts a literal copy of the next character (https://stackoverflow.com/a/4781099/3947332)
