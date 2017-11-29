@@ -1,11 +1,11 @@
 # IPC
 
-This folder contains code relating to interprocess communication techniques
+This folder contains code related to interprocess communication techniques
 implemented in C. Provided are examples of
 
  - [POSIX shared memory](#posix-shared-memory)
  - [Ordinary pipes](#ordinary-pipes)
- - Named pipes (fifos)
+ - [Named pipes (fifos)](#named-pipes-fifos)
  - System V message queues
 
 Below are two very basic and watered down descriptions of these shared memory
