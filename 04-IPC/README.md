@@ -165,11 +165,13 @@ or port (similar to shared memory).
 
 # Run the code!
 
-Go ahead and run `make` in this directory to build examples of programs that use IPC. The first
-example (`01-*`) demonstrates a process (`01-shm-open`) creating a shared memory object, associating
-it with a unique name, and getting a file descriptor representation of it via `shm_open`. Finally,
-another process (`01-shm-unlink`) comes along and removes the shared memory object's name, and once
-all processes unmap the data corresponding to the object, removes the object from the kernel.
+Go ahead and run `make` in this directory to build examples of programs that use IPC.
+
+The first example (`01-*`) demonstrates a process (`01-shm-open`) creating a shared memory
+object, associating it with a unique name, and getting a file descriptor representation of
+it via `shm_open`. Finally, another process (`01-shm-unlink`) comes along and removes the
+shared memory object's name, and once all processes unmap the data corresponding to the object,
+removes the object from the kernel.
 
 In the second example (`02-*`) we see an incredibly simple shared memory example. After reading the
 above descriptions and some of the man pages, what's happening should be fairly obvious, but basically
