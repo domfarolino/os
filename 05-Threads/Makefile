@@ -1,5 +1,6 @@
 CXX=gcc
 PROGRAMS=01-pthread-example 02-thread-arg-scope 03-thread-struct-args
+UNAME := $(shell uname)
 
 ifeq ($(UNAME), Linux)
   CFLAGS= -lpthread # To use the pthread library
