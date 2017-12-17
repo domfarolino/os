@@ -42,7 +42,6 @@ int main() {
      * Now we'll wait for our second child process to either
      * exit, or be terminated or stopped by a signal.
      */
-
     printf("Parent process will now wait for second child to either exit normally or be terminated (or stopped) by a signal.\n");
     pid_t waitedChild = waitpid(secondChild, &status, WUNTRACED);
 

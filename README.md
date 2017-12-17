@@ -1,5 +1,5 @@
 # os
-Repository to accompany me along me OS journey. This repo consists primarily of C code that ranges from the
+Repository to accompany me along my OS journey. This repo consists primarily of C code that ranges from the
 creation of basic kernel modules to code that utilizes POSIX system calls.
 
 Random things learned:
