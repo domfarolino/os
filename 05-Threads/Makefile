@@ -1,5 +1,5 @@
 CXX=gcc
-PROGRAMS=01-pthread-example 02-thread-arg-scope 03-thread-struct-args
+PROGRAMS=01-pthread-example 02-thread-arg-scope 03-thread-struct-args 04-thread-cancellation
 UNAME := $(shell uname)
 
 ifeq ($(UNAME), Linux)
@@ -19,5 +19,7 @@ all: $(PROGRAMS)
 03-thread-struct-args: 03-thread-struct-args.c
 	$(CXX) $^ -o $@ $(CFLAGS)
 
+04-thread-cancellation: 04-thread-cancellation.c
+	$(CXX) $^ -o $@ $(CFLAGS)
 clean:
 	rm $(PROGRAMS)
