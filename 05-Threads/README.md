@@ -59,18 +59,17 @@ responsible for freeing the memory.
 
 It is common to want to cancel a thread's execution if it is not needed anymore. The way in which
 a thread can get cancelled in the Pthread library depends on both the thread's *cancellation state*, and
-*cancellation type*. A thread can set its cancellation state to either *enabled* or *disabled*, indicating
+*cancellation type*.
+
+A thread can set its cancellation state to either *enabled* or *disabled*, indicating
 whether or not the thread is able to be cancelled. *Enabled* is the default for all threads.
+A thread can set its *cancellation type* to either *deferred* or *asynchronous* which determines
+the manner in which the thread will be cancelled.
 
-If a thread is able to be cancelled, it can either be cancelled in a *deferred* manner, or an *asynchronous* manner.
-
-Cancelling in a *deferred* manner means that a cancellation request is sent to the target thread, and the
-target thread is responsible for checking for cancellation requests when it chooses, and cancelling when it
-is safe to do so. This is done with a call to `pthread_testcancel()` from the target thread to check for
-cancellation requests.
-
-Cancelling in an *asynchronous* manner means that a cancellation request is sent to the target thread, and the
-target thread will be cancelled at any time.
+If a thread's cancellation type is deferred, the thread is responsible for checking for and responding to
+cancellation requests, and cancelling when it is safe to do so. Checking for pending cancellation requests
+is done with a call to `pthread_testcancel()` from the target thread. If a thread's cancellation type is
+asynchronous, a thread may be cancelled as soon as it receives a cancellation request, and with no warning.
 
 Basically, asynchronous cancelling is fast and dangerous, since all thread-allocated resources may not get
 explicitly cleaned up, and deferred cancelling is often slower, more manual, and safer.
