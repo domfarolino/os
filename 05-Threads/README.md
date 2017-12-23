@@ -58,12 +58,12 @@ we can allocate memory on the heap and return a pointer to it, however the threa
 responsible for freeing the memory.
 
 It is common to want to cancel a thread's execution if it is not needed anymore. The way in which
-a thread can get cancelled in the Pthread library depends on both the thread's *cancellation state*, and
-*cancellation type*.
+a thread can get cancelled in the Pthread library depends on both the thread's cancellation state,
+and cancellation type.
 
 A thread can set its cancellation state to either *enabled* or *disabled*, indicating
 whether or not the thread is able to be cancelled. *Enabled* is the default for all threads.
-A thread can set its *cancellation type* to either *deferred* or *asynchronous* which determines
+A thread can set its cancellation type to either *deferred* or *asynchronous* which determines
 the manner in which the thread will be cancelled.
 
 If a thread's cancellation type is deferred, the thread is responsible for checking for and responding to
