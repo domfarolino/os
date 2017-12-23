@@ -57,6 +57,24 @@ our argument struct for a return value that we can modify in the thread and view
 we can allocate memory on the heap and return a pointer to it, however the thread's caller is then
 responsible for freeing the memory.
 
+It is common to want to cancel a thread's execution if it is not needed anymore. The way in which
+a thread can get cancelled in the Pthread library depends on both the thread's *cancellation state*, and
+*cancellation type*. A thread can set its cancellation state to either *enabled* or *disabled*, indicating
+whether or not the thread is able to be cancelled. *Enabled* is the default for all threads.
+
+If a thread is able to be cancelled, it can either be cancelled in a *deferred* manner, or an *asynchronous* manner.
+
+Cancelling in a *deferred* manner means that a cancellation request is sent to the target thread, and the
+target thread is responsible for checking for cancellation requests when it chooses, and cancelling when it
+is safe to do so. This is done with a call to `pthread_testcancel()` from the target thread to check for
+cancellation requests.
+
+Cancelling in an *asynchronous* manner means that a cancellation request is sent to the target thread, and the
+target thread will be cancelled at any time.
+
+Basically, asynchronous cancelling is fast and dangerous, since all thread-allocated resources may not get
+explicitly cleaned up, and deferred cancelling is often slower, more manual, and safer.
+
 ## Library functions/system calls
 
 In this section are the library functions that correspond with some of the aforementioned
@@ -120,6 +138,45 @@ int b = 11;
 
 // We can either type "ptr = &b", or call "changePtrToB(ptr)"
 ```
+
+---
+
+Below are the functions associated with thread cancellation.
+
+### `pthread_setcancelstate(int state, int *oldstate)`
+
+This function sets the calling thread's cancellation state to the given state, and if `oldstate` is not NULL,
+places the value of the thread's cancellation state before this call into `oldstate`. We use this pointer
+variable instead of returning the old state because we reserve the return value to indicate the success/failure
+of this function. Valid values for `state` are as follows:
+
+ - `PTHREAD_CANCEL_ENABLE` (default)
+ - `PTHREAD_CANCEL_DISABLE`
+
+Cancellation requests to a thread that cannot be cancelled become pending, and can be seen when cancellation is enabled.
+
+### `pthread_setcanceltype(int type, int *oldtype)`
+
+Most of the above function call's description applies to this as well. Valid values for `type` are as follows:
+
+ - `PTHREAD_CANCEL_DEFERRED` (default)
+ - `PTHREAD_CANCEL_ASYNCHRONOUS`
+
+When a thread's cancellation type is asynchronous, requests to cancel the thread are acted upon at any time, disallowing
+the thread time to clean up any resources it has allocated. When the cancellation type is deferred, requests to cancel the
+thread are acted upon when the thread reaches a cancellation point (created by `pthread_testcancel()` and various other system calls).
+
+### `pthread_testcancel()`
+
+This function creates a cancellation point for the calling thread. If the calling thread's cancellation type is deferred, Cancellation
+requests for the thread are pending until a cancellation point is created.
+
+### `pthread_cancel(pthread_t thread)`
+
+This function takes in a thread identifier acting as the target thread to send a cancellation request to.
+If the target thread is not able to be cancelled (it's cancellation state is *disabled*), the request
+becomes pending. If the target's cancellation state is or becomes enabled, the thread will cancel in a manner
+relavent to its cancellation type if there are pending requests out for its cancellation. See `pthread_setcanceltype()`.
 
 # Run the code!
 
