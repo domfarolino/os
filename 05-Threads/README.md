@@ -152,7 +152,8 @@ of this function. Valid values for `state` are as follows:
  - `PTHREAD_CANCEL_ENABLE` (default)
  - `PTHREAD_CANCEL_DISABLE`
 
-Cancellation requests to a thread that cannot be cancelled become pending, and can be seen when cancellation is enabled.
+Cancellation requests to a thread that cannot be cancelled become pending, and take effect when cancellation is
+enabled.
 
 ### `pthread_setcanceltype(int type, int *oldtype)`
 
@@ -167,8 +168,8 @@ thread are acted upon when the thread reaches a cancellation point (created by `
 
 ### `pthread_testcancel()`
 
-This function creates a cancellation point for the calling thread. If the calling thread's cancellation type is deferred, Cancellation
-requests for the thread are pending until a cancellation point is created.
+This function creates a cancellation point for the calling thread. If the calling thread's cancellation type is deferred,
+cancellation requests for the thread are pending until a cancellation point is created.
 
 ### `pthread_cancel(pthread_t thread)`
 
@@ -195,4 +196,9 @@ thread that goes out of scope when the thread is created.
 In the third example, we demonstrate using a struct to package multiple arguments for a thread
 together and provide a slot for the return value as well.
 
-todo(domfarolino): fourth and so on (ideally thread-safe parallel examples demonstrating a thread's power)
+In the fourth example, we demonstrate thread cancellation with three different threads. Each thread
+has a different cancellation state/type combination. One of the threads originally has its cancellation
+state disabled, and later becomes asynchronously cancellable. This thread will cancel right away as it
+has a pending cancellation request.
+
+todo(domfarolino): fifth and so on (ideally thread-safe parallel examples demonstrating a thread's power)
