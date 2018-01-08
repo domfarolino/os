@@ -1,4 +1,4 @@
-CXX=gcc
+CC=gcc
 PROGRAMS=01-shm-open 01-shm-unlink 02-shm-producer 02-shm-consumer 03-mmap-file 04-pipe 05-mkfifo-producer 05-mkfifo-consumer
 UNAME := $(shell uname)
 
@@ -11,28 +11,28 @@ endif
 all: $(PROGRAMS)
 
 01-shm-open: 01-shm-open.c
-	$(CXX) $^ -o $@ $(CFLAGS)
+	$(CC) $^ -o $@ $(CFLAGS)
 
 01-shm-unlink: 01-shm-unlink.c
-	$(CXX) $^ -o $@ $(CFLAGS)
+	$(CC) $^ -o $@ $(CFLAGS)
 
 02-shm-producer: 02-shm-producer.c
-	$(CXX) $^ -o $@ $(CFLAGS)
+	$(CC) $^ -o $@ $(CFLAGS)
 
 02-shm-consumer: 02-shm-consumer.c
-	$(CXX) $^ -o $@ $(CFLAGS)
+	$(CC) $^ -o $@ $(CFLAGS)
 
 03-mmap-file: 03-mmap-file.c
-	$(CXX) $^ -o $@ $(CFLAGS)
+	$(CC) $^ -o $@ $(CFLAGS)
 
 04-pipe: 04-pipe.c
-	$(CXX) $^ -o $@ $(CFLAGS)
+	$(CC) $^ -o $@ $(CFLAGS)
 
 05-mkfifo-producer: 05-mkfifo-producer.c
-	$(CXX) $^ -o $@ $(CFLAGS)
+	$(CC) $^ -o $@ $(CFLAGS)
 
 05-mkfifo-consumer: 05-mkfifo-consumer.c
-	$(CXX) $^ -o $@ $(CFLAGS)
+	$(CC) $^ -o $@ $(CFLAGS)
 
 
 clean:
