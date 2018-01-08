@@ -1,5 +1,5 @@
 CC=gcc
-CPP=g++
+CXX=g++
 
 all: fork fork2 fork3 forkChain
 
@@ -7,10 +7,10 @@ fork: fork.c
 	$(CC) $^ -o $@
 
 fork2: fork2.cpp
-	$(CPP) $^ -o $@
+	$(CXX) $^ -o $@
 
 forkChain: forkChain.cpp
-	$(CPP) $^ -o $@
+	$(CXX) $^ -o $@
 
 fork3: fork3.c
 	$(CC) $^ -o $@
