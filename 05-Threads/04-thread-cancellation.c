@@ -10,9 +10,11 @@ void* thread_1() {
   // Use a manual sleep because the sleep() system call creates a cancellation point
   time_t endTime = time(NULL) + 1;
   while(time(NULL) < endTime) {}
+
   printf("\nThread 1: Still working...I'll create a cancellation point in two seconds\n");
   endTime = time(NULL) + 2;
   while(time(NULL) < endTime) {}
+
   pthread_testcancel();
   return NULL;
 }
@@ -20,7 +22,7 @@ void* thread_1() {
 void* thread_2() {
   printf("Thread 2: Starting! I can be cancelled in an asynchronous manner\n");
   pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
-  sleep(3);
+  sleep(3); // main thread will cancel this thread sometime during our 3 second sleep
   return NULL;
 }
 
@@ -28,8 +30,10 @@ void* thread_3() {
   printf("Thread 3: Starting! I cannot be cancelled right now\n");
   pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
   sleep(4);
+
   printf("Thread 3: Ok going to enable asynchronous cancellation in two seconds\n");
   sleep(2);
+
   pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
   pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
   return NULL;
