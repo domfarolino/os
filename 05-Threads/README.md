@@ -57,6 +57,23 @@ our argument struct for a return value that we can modify in the thread and view
 we can allocate memory on the heap and return a pointer to it, however the thread's caller is then
 responsible for freeing the memory.
 
+It is common to want to cancel a thread's execution if it is not needed anymore. The way in which
+a thread can get cancelled in the pthread library depends on both the thread's cancellation state,
+and cancellation type.
+
+A thread can set its cancellation state to either *enabled* or *disabled*, indicating
+whether or not the thread is able to be cancelled. *Enabled* is the default for all threads.
+A thread can set its cancellation type to either *deferred* or *asynchronous*, indicating the
+manner in which the thread will be cancelled.
+
+If a thread's cancellation type is deferred, the thread is responsible for checking for and responding to
+cancellation requests, and cancelling when it is safe to do so. Checking for pending cancellation requests
+is done with a call to `pthread_testcancel()` from the target thread. If a thread's cancellation type is
+asynchronous, a thread may be cancelled as soon as it receives a cancellation request, and with no warning.
+
+Basically, asynchronous cancelling is fast and dangerous, since all thread-allocated resources may not get
+explicitly cleaned up, and deferred cancelling is often slower, more manual, and safer.
+
 ## Library functions/system calls
 
 In this section are the library functions that correspond with some of the aforementioned
@@ -121,6 +138,46 @@ int b = 11;
 // We can either type "ptr = &b", or call "changePtrToB(ptr)"
 ```
 
+---
+
+Below are the functions associated with thread cancellation.
+
+### `pthread_setcancelstate(int state, int *oldstate)`
+
+This function sets the calling thread's cancellation state to the given state, and if `oldstate` is not NULL,
+places the value of the thread's cancellation state before this call into `oldstate`. We use this pointer
+variable instead of returning the old state because we reserve the return value to indicate the success/failure
+of this function. Valid values for `state` are as follows:
+
+ - `PTHREAD_CANCEL_ENABLE` (default)
+ - `PTHREAD_CANCEL_DISABLE`
+
+Cancellation requests to a thread that cannot be cancelled become pending, and take effect when cancellation is
+enabled.
+
+### `pthread_setcanceltype(int type, int *oldtype)`
+
+Most of the above function call's description applies to this as well. Valid values for `type` are as follows:
+
+ - `PTHREAD_CANCEL_DEFERRED` (default)
+ - `PTHREAD_CANCEL_ASYNCHRONOUS`
+
+When a thread's cancellation type is asynchronous, requests to cancel the thread are acted upon at any time, disallowing
+the thread time to clean up any resources it has allocated. When the cancellation type is deferred, requests to cancel the
+thread are acted upon when the thread reaches a cancellation point (created by `pthread_testcancel()` and various other system calls).
+
+### `pthread_testcancel()`
+
+This function creates a cancellation point for the calling thread. If the calling thread's cancellation type is deferred,
+cancellation requests for the thread are pending until a cancellation point is created.
+
+### `pthread_cancel(pthread_t thread)`
+
+This function takes in a thread identifier acting as the target thread to send a cancellation request to.
+If the target thread is not able to be cancelled (it's cancellation state is *disabled*), the request
+becomes pending. If the target's cancellation state is or becomes enabled, the thread will cancel in a manner
+relavent to its cancellation type if there are pending requests out for its cancellation. See `pthread_setcanceltype()`.
+
 # Run the code!
 
 Go ahead and run `make` in this directory to build some threaded programs!
@@ -139,4 +196,21 @@ thread that goes out of scope when the thread is created.
 In the third example, we demonstrate using a struct to package multiple arguments for a thread
 together and provide a slot for the return value as well.
 
-todo(domfarolino): fourth and so on (ideally thread-safe parallel examples demonstrating a thread's power)
+In the fourth example, we demonstrate thread cancellation with three different threads. Each thread
+has a different cancellation state/type combination. One of the threads originally has its cancellation
+state disabled, and later becomes asynchronously cancellable. This thread will cancel right away as it
+has a pending cancellation request.
+
+The fifth example demonstrates that when a process-directed signal (a signal not directed to any specific thread) is
+generated, any thread that not blocking the signal can handle it, though many implementatinos give the main thread first
+priority is possible. This allows multiple signals of the same type to be handled simultaneously. If the number of signals
+of the same type generated for a process outnumber the number of threads able to handle said signal, the signal becomes pending
+for the process, and is handled via the next thread that unblocks the signal. Note that signals of the same type can be coalesced
+if they are generated before they can be delivered (handled).
+
+For more information, see these helpful links:
+
+ - [This](https://stackoverflow.com/questions/11679568) on handling signals in multithreaded applications
+ - [This](https://unix.stackexchange.com/a/181470) and [this](https://unix.stackexchange.com/a/181438) on signal coalescence
+
+todo(domfarolino): sixth and so on (ideally thread-safe parallel examples demonstrating a thread's power)
