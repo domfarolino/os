@@ -201,4 +201,16 @@ has a different cancellation state/type combination. One of the threads original
 state disabled, and later becomes asynchronously cancellable. This thread will cancel right away as it
 has a pending cancellation request.
 
-todo(domfarolino): fifth and so on (ideally thread-safe parallel examples demonstrating a thread's power)
+The fifth example demonstrates that when a process-directed signal (a signal not directed to any specific thread) is
+generated, any thread that not blocking the signal can handle it, though many implementatinos give the main thread first
+priority is possible. This allows multiple signals of the same type to be handled simultaneously. If the number of signals
+of the same type generated for a process outnumber the number of threads able to handle said signal, the signal becomes pending
+for the process, and is handled via the next thread that unblocks the signal. Note that signals of the same type can be coalesced
+if they are generated before they can be delivered (handled).
+
+For more information, see these helpful links:
+
+ - [This](https://stackoverflow.com/questions/11679568) on handling signals in multithreaded applications
+ - [This](https://unix.stackexchange.com/a/181470) and [this](https://unix.stackexchange.com/a/181438) on signal coalescence
+
+todo(domfarolino): sixth and so on (ideally thread-safe parallel examples demonstrating a thread's power)
