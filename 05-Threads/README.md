@@ -211,6 +211,6 @@ if they are generated before they can be delivered (handled).
 For more information, see these helpful links:
 
  - [This](https://stackoverflow.com/questions/11679568) on handling signals in multithreaded applications
- - [This](https://unix.stackexchange.com/a/181470) and [this](https://unix.stackexchange.com/a/181438) on signal coalescence
+ - [This](https://unix.stackexchange.com/a/181470) and [this](https://www.gnu.org/software/libc/manual/html_node/Merged-Signals.html) on signal coalescence
 
 todo(domfarolino): sixth and so on (ideally thread-safe parallel examples demonstrating a thread's power)
