@@ -19,7 +19,7 @@ of the threading examples in this repository use until/unless support for
 native Windows threads is added at some point :)
 
 Below is a basic set of steps commonly performed when using the pthreads library
-to create and manage threads.
+to create and manage threads:
 
  - First, setup the identifiers (`pthread_t`) and attributes (`pthread_attr_t`) for the threads
    we'll be spinning up.
@@ -35,7 +35,7 @@ things we often want to do when working with threads is:
  - Use a thread's return value, or the results of its labor
 
 Both of these involve sharing data between two threads of the same process, which is important to
-understand. Pthreads complicates this just a bit because the function a thread begins execution in
+understand. Pthreads complicates this just a bit because the function a thread begins execution in:
 
  - Must take a single `void*` argument, and
  - Must also return a `void*`
@@ -57,6 +57,8 @@ our argument struct for a return value that we can modify in the thread and view
 we can allocate memory on the heap and return a pointer to it, however the thread's caller is then
 responsible for freeing the memory.
 
+## Cancelling a thread
+
 It is common to want to cancel a thread's execution if it is not needed anymore. The way in which
 a thread can get cancelled in the pthread library depends on both the thread's cancellation state,
 and cancellation type.
@@ -64,7 +66,7 @@ and cancellation type.
 A thread can set its cancellation state to either *enabled* or *disabled*, indicating
 whether or not the thread is able to be cancelled. *Enabled* is the default for all threads.
 A thread can set its cancellation type to either *deferred* or *asynchronous*, indicating the
-manner in which the thread will be cancelled.
+manner in which the thread will be cancelled. *Deferred* is the default for all threads.
 
 If a thread's cancellation type is deferred, the thread is responsible for checking for and responding to
 cancellation requests, and cancelling when it is safe to do so. Checking for pending cancellation requests
