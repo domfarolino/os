@@ -118,6 +118,10 @@ still confusing, consider the following basic example in which we make a functio
 that modifies a pointer.
 
 ```c
+int a = 10;
+int* ptr = &a;
+int b = 11;
+
 // This function does absolutely nothing
 void useless(int *dumPtr) { // we create a copy of the important pointer
   // We operate on the copy of the pointer to get what we want (cool!)
@@ -130,12 +134,8 @@ void useless(int *dumPtr) { // we create a copy of the important pointer
 
 // Hey this function actually works
 void changePtrToB(int **actualPtrNotACopy) {
-  actualPtrNotACopy = &b;
+  *actualPtrNotACopy = &b;
 }
-
-int a = 10;
-int* ptr = &a;
-int b = 11;
 
 // We can either type "ptr = &b", or call "changePtrToB(ptr)"
 ```
