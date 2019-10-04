@@ -7,4 +7,8 @@ solutions.
 # 01-thread-intro
 
 This is just a very simple example demonstrating the C++ std::thread API. It is
-not very significant on its own.
+not very significant on its own. It demonstrates the following:
+
+ - Running a function that takes a parameter off-main-thread
+ - Running a _lambda_ function that takes a parameter off-main-thread
+ - Calling an object member function from a different thread
