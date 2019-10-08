@@ -113,7 +113,7 @@ condition_variable.wait(lock, fn);
 ```
 
 The above code immediately invokes `fn`, which must return a boolean, and take
-no arguments. Returning `true` indicates the thread can stop waiting; false`
+no arguments. Returning `true` indicates the thread can stop waiting; false
 puts you back in a waiting state. You can check `wait\_condition` inside `fn`,
 just as you would in the explicit while loop.
 
