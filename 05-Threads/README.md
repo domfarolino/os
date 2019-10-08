@@ -120,11 +120,11 @@ just as you would in the explicit while loop.
 <!-- Mutex status after spurious wake: https://stackoverflow.com/questions/41007503 -->
 <details>
 <summary><b>Mutex status after spurious wake</b></summary>
-You may be wondering: if it is safe (thread\_safe) to check the
-`wait\_condition` after a spurious wake-up? The answer is yes; `wait` unlocks
+You may be wondering: if it is safe (thread_safe) to check the
+`wait_condition` after a spurious wake-up? The answer is yes; `wait` unlocks
 the mutex before sleeping, and a spurious wake-up can only happen when the mutex
 is unlocked. On a spurious wake-up, the lock is reacquired, so you can guarantee
-that `fn` and checking `wait\_condition` are always guarded by the lock, which
+that `fn` and checking `wait_condition` are always guarded by the lock, which
 is often what you want. For more information see
 https://stackoverflow.com/questions/41007503
 </details>
