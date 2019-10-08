@@ -118,8 +118,8 @@ waiting; false` puts you back in a waiting state. You can check
 `wait\_condition` inside `fn`, just as you would in the explicit while loop.
 
 <!-- Mutex status after spurious wake: https://stackoverflow.com/questions/41007503 -->
-**Mutex status after spurious wake**
 <details>
+<summary>**Mutex status after spurious wake**<summary>
 You may be wondering: if it is safe (thread\_safe) to check the
 `wait\_condition` after a spurious wake-up? The answer is yes; `wait` unlocks
 the mutex before sleeping, and a spurious wake-up can only happen when the mutex
