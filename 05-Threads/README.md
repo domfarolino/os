@@ -119,7 +119,7 @@ waiting; false` puts you back in a waiting state. You can check
 
 <!-- Mutex status after spurious wake: https://stackoverflow.com/questions/41007503 -->
 <details>
-<summary>**Mutex status after spurious wake**<summary>
+<summary><b>Mutex status after spurious wake</b></summary>
 You may be wondering: if it is safe (thread\_safe) to check the
 `wait\_condition` after a spurious wake-up? The answer is yes; `wait` unlocks
 the mutex before sleeping, and a spurious wake-up can only happen when the mutex
