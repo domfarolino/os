@@ -112,10 +112,10 @@ Fortunately, the STL provides a `wait` overload equivalent to the above code:
 condition_variable.wait(lock, fn);
 ```
 
-The above code immediately invokes the `fn` function, which must return a
-boolean, and have no arguments. Returning `true` indicates the thread can stop
-waiting; false` puts you back in a waiting state. You can check
-`wait\_condition` inside `fn`, just as you would in the explicit while loop.
+The above code immediately invokes `fn`, which must return a boolean, and take
+no arguments. Returning `true` indicates the thread can stop waiting; false`
+puts you back in a waiting state. You can check `wait\_condition` inside `fn`,
+just as you would in the explicit while loop.
 
 <!-- Mutex status after spurious wake: https://stackoverflow.com/questions/41007503 -->
 <details>
