@@ -1,5 +1,5 @@
 CC=g++
-PROGRAMS=01-thread-intro 02-data-races 03-producer-consumer-queue
+PROGRAMS=01-thread-intro 02-data-races 03-producer-consumer-queue 04-producer-consumer-buffer
 UNAME := $(shell uname)
 
 CFLAGS = -std=c++11
@@ -19,6 +19,9 @@ all: $(PROGRAMS)
 	$(CC) $^ -o $@ $(CFLAGS)
 
 03-producer-consumer-queue: 03-producer-consumer-queue.cc
+	$(CC) $^ -o $@ $(CFLAGS)
+
+04-producer-consumer-buffer: 04-producer-consumer-buffer.cc
 	$(CC) $^ -o $@ $(CFLAGS)
 
 clean:
