@@ -39,7 +39,7 @@ public:
     condition_.wait(lock, [&]() -> bool {
       bool can_skip_waiting = (size_ != buffer_.size());
         if (can_skip_waiting == false)
-          std::cout << "\x1B[34m   Producer sleeping because buffer is full\x1B[00m" << std::endl;
+          std::cout << "\x1B[34m   [+] Producer sleeping because buffer is full\x1B[00m" << std::endl;
       return can_skip_waiting;
     });
 
@@ -47,6 +47,7 @@ public:
     write_ %= buffer_.size();
 
     size_++;
+    std::cout << "\x1B[33m Producer producing '" << message << "'\x1b[00m" << std::endl;
     lock.unlock();
     condition_.notify_one();
   }
@@ -56,7 +57,7 @@ public:
     condition_.wait(lock, [&]() -> bool {
       bool can_skip_waiting = (size_ > 0);
       if (can_skip_waiting == false)
-        std::cout << "\x1B[34m   Consumer sleeping because buffer is empty\x1B[00m" << std::endl;
+        std::cout << "\x1B[34m   [-] Consumer sleeping because buffer is empty\x1B[00m" << std::endl;
       return can_skip_waiting;
     });
 
@@ -64,6 +65,7 @@ public:
     read_ %= buffer_.size();
 
     size_--;
+    std::cout << "\x1B[32m Consumer consuming '" << message << "'\x1B[00m" << std::endl;
     lock.unlock();
     condition_.notify_one();
     return message;
@@ -80,41 +82,27 @@ private:
 // This program demonstrates the classic producer-consumer problem with threads
 // synchronizing a shared circular buffer.
 
-void producer(ThreadableCircularBuffer& buffer, int num_messages, std::mutex& stdout_mutex) {
+void producer(ThreadableCircularBuffer& buffer, int num_messages) {
   std::string message;
   for (int i = 1; i <= num_messages; ++i) {
     if (i == num_messages) message = "quit";
     else message = "Messages #" + std::to_string(i);
 
     buffer.enqueue(message);
-
-    {
-      std::unique_lock<std::mutex> lock(stdout_mutex);
-      std::cout << "\x1B[33m Producer producing '" << message << "'\x1b[00m" << std::endl;
-    }
-
-    // Producer sleeps for a random amount of time.
     std::this_thread::sleep_for(std::chrono::milliseconds(get_random_wait()));
   }
 }
 
-void consumer(ThreadableCircularBuffer& buffer, std::mutex& stdout_mutex) {
+void consumer(ThreadableCircularBuffer& buffer) {
   std::string message;
   while (message != "quit") {
     message = buffer.dequeue();
-
-    {
-      std::unique_lock<std::mutex> lock(stdout_mutex);
-      std::cout << "\x1B[32m Consumer consuming '" << message << "'\x1B[00m" << std::endl;
-    }
-
     std::this_thread::sleep_for(std::chrono::milliseconds(get_random_wait()));
   }
 }
 
 int main() {
   srand(time(NULL));
-  std::mutex stdout_mutex; // For std::cout.
 
   int buffer_size = rand() % 16 + 1;
   int num_messages = rand() % 64 + 1;
@@ -122,8 +110,8 @@ int main() {
   std::cout << "Producer will make " << num_messages << " messages" << std::endl;
 
   ThreadableCircularBuffer threadable_buffer(buffer_size);
-  std::thread producer_thread(producer, std::ref(threadable_buffer), num_messages, std::ref(stdout_mutex));
-  consumer(threadable_buffer, stdout_mutex);
+  std::thread producer_thread(producer, std::ref(threadable_buffer), num_messages);
+  consumer(threadable_buffer);
   producer_thread.join();
   return 0;
 }
