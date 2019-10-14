@@ -135,3 +135,16 @@ guarantee that <i>fn</i> and <i>wait_condition</i> are always guarded by the
 lock, which is often what you want. For more information see
 https://stackoverflow.com/questions/41007503
 </details>
+
+# 04-producer-consumer-buffer
+
+This is a more-traditional producer-consumer problem example, which is slightly more
+complex than `03-producer-consumer-queue`. In this case, the producer and consumer are
+sharing a "bounded" circular buffer. This example demonstrates making the buffer
+thread-safe, as well as the logic around the producer and consumer.
+
+It is more complex than `03`, because as a result of the buffer being bounded, unlike
+the unbounded queue, the circular buffer must not overwrite un-consumed values in the
+buffer when it is full. This can happen if the consumer is not consuming fast enough.
+The solution entails putting the producer to sleep until the consumer catches up, emptying
+some messages from the buffer.
