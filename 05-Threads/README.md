@@ -35,12 +35,19 @@ that must be synchronized between threads. This example demonstrates using a
 doesn't really even improve our performance in the first place because the
 operations are so cheap, but the takeaway is clear.
 
-# 03-producer-consumer (condition variables)
+# 03-producer-consumer-queue (condition variables)
 
-This is an example implementation of the classic producer-consumer problem. It
+This is a simplified example of the classic producer-consumer problem. It
 demonstrates a producer thread producing messages for a consumer thread. The
-threads are producing and consuming data at different rates, and need to
-synchronize access to the message buffer they are reading/writing from/to.
+messages are written to and read from a `std::queue`, and the producer has a
+variable wait-time between producing messages. If the consumer has consumed all
+of the messages in the queue, it uses a `std::condition_variable` to wait for
+the producer to produce more messages and notify the consumer via the variable.
+
+Furthermore, access to the queue must be synchronized as it is a shared resource.
+If we did not synchronize access to the queue with some synchronization mechanism,
+it would be possible for the producer and consumer to enqueue & dequeue messages at
+the same time, potentially resulting in a phantom read/write.
 
 ## Producer
 
@@ -49,11 +56,11 @@ producer is pushing messages to a `std::queue`. However, since the consumer will
 read and dequeue messages from the queue, and `std::queue` is not thread-safe by
 default, we must wrap our accesses to this shared resource with a mutex, or
 equivalently a `std::lock_guard`. Our example producer produces a random number
-of messages, each with a random delay in between each.
+of messages, with a random delay between each.
 
 ## Consumer
 
-Naturally the consumer wants to consume messages to the queue until it receives
+Naturally the consumer wants to consume messages from the queue until it receives
 some sort of "quit" message from the producer. (This is because an empty queue
 does not mean that the producer is finished). The `std::queue` of messages is a
 shared resource which is not thread-safe by default, so its accesses must be
