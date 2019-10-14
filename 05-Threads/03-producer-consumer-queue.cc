@@ -17,8 +17,9 @@ int get_random_wait() {
   return random;
 }
 
-// This program demonstrates the classic producer-consumer problem with threads
-// synchronizing a shared resource, in this case, a message std::queue.
+// This program demonstrates a simplified version of the classic
+// producer-consumer problem with threads synchronizing a shared resource,
+// in this case, a message std::queue.
 
 void producer(std::queue<std::string>& q, std::mutex& mutex,
               std::condition_variable& condition) {
