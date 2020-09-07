@@ -73,24 +73,13 @@ void consumer(std::queue<std::string>& q, base::Mutex& mutex,
   }
 }
 
-void something(std::queue<std::string>& input) {
-  printf("Invoking something: %d", int(input.size()));
-}
-
-template <typename F, typename... Args>
-base::Thread<Args...> make_thread(F&& f, Args&&... args) {
-  return base::Thread<Args...>(std::forward<F>(f), std::forward<Args>(args)...);
-}
-
 int main() {
   srand(time(NULL));
   base::Mutex mutex(base::ThreadMode::kUsingPthread);
   base::ConditionVariable condition(base::ThreadMode::kUsingPthread);
 
   std::queue<std::string> message_queue;
-  // base::Thread producer_thread(producer, std::ref(message_queue), std::ref(mutex), std::ref(condition));
-  // std::thread producer_thread(producer, std::ref(message_queue), std::ref(mutex), std::ref(condition));
-  auto producer_thread = make_thread(producer, std::ref(message_queue), std::ref(mutex), std::ref(condition));
+  base::Thread producer_thread(producer, std::ref(message_queue), std::ref(mutex), std::ref(condition));
   consumer(message_queue, mutex, condition);
   producer_thread.join();
   return 0;

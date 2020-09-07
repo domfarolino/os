@@ -20,6 +20,10 @@ public:
     CHECK(!pthread_mutex_init(&pthread_mutex_, nullptr));
   }
 
+  Mutex(Mutex&) = delete;
+  Mutex(Mutex&&) = delete;
+  Mutex& operator=(const Mutex&) = delete;
+
   // Implicit casting.
   operator std::mutex&() {
     CHECK_EQ(mode_, ThreadMode::kUsingCpp);
@@ -84,6 +88,10 @@ public:
   ConditionVariable(ThreadMode mode): mode_(mode) {
     CHECK(!pthread_cond_init(&pthread_condition_, nullptr));
   }
+  ConditionVariable (ConditionVariable&) = delete;
+  ConditionVariable (ConditionVariable&&) = delete;
+  ConditionVariable& operator=(const ConditionVariable&) = delete;
+
 
   void wait(Mutex& mutex, std::function<bool()> predicate) {
     if (mode_ == ThreadMode::kUsingCpp) {

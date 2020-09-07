@@ -46,15 +46,15 @@ public:
   std::tuple<Ts...> args;
 };
 
-template <typename... Ts>
+// template <typename... Ts>
 class Thread {
 public:
-  template <typename F/*, typename... Ts*/>
+  template <typename F, typename... Ts>
   Thread(F&& func, Ts&&... args) {
     pthread_attr_init(&attributes_);
 
-    thread_arg_ = std::make_unique<ThreadArg<Ts...>>(std::forward<F>(func), std::forward<Ts>(args)...);
-    pthread_create(&id_, &attributes_, start, thread_arg_.get());
+    ThreadArg<Ts...>* thread_arg_ = new ThreadArg<Ts...>(std::forward<F>(func), std::forward<Ts>(args)...);
+    pthread_create(&id_, &attributes_, start<Ts...>, thread_arg_);
   }
 
   static void sleep_for(std::chrono::milliseconds ms) {
@@ -66,9 +66,9 @@ public:
     pthread_join(id_, nullptr);
   }
 
-  // template <typename... Ts>
+  template <typename... Ts>
   static void* start(void* in) {
-    std::unique_ptr<ThreadArg<Ts...>> thread_arg((ThreadArg<Ts...>*)(in));
+    std::unique_ptr<ThreadArg<Ts...>> thread_arg((ThreadArg<Ts...>*)in);
     CHECK(thread_arg);
 
     helper::invoker(thread_arg->f, thread_arg->args);
@@ -78,7 +78,6 @@ public:
 private:
   pthread_t id_;
   pthread_attr_t attributes_;
-  std::unique_ptr<ThreadArg<Ts...>> thread_arg_;
 };
 
 } // namespace base
